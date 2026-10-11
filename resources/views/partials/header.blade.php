@@ -38,6 +38,18 @@
     }
     .header-user .name{ font-size:13px; font-weight:600; color:#F5F1E8; }
     .header-user .role{ font-size:11px; color:#9FA8C9; }
+    .header-nav{ display:flex; align-items:center; gap:4px; margin-left:28px; }
+    .header-nav a{
+        display:flex; align-items:center; gap:7px; padding:7px 11px; border-radius:7px;
+        text-decoration:none; color:#B9C0DC; font-size:13px; font-weight:500;
+        transition:background .15s ease, color .15s ease;
+    }
+    .header-nav a:hover{ background:var(--navy-2); color:#F5F1E8; }
+    .header-nav a.active{ background:var(--gold-dim); color:var(--gold); }
+
+    @media (max-width: 860px){
+        .header-nav{ display:none; }
+    }
 </style>
 @endpush
 
@@ -49,6 +61,18 @@
             <div class="sub">Hệ thống học vụ</div>
         </div>
     </div>
+
+    {{-- Menu lấy từ bảng menus (vị trí Header), quản lý tại trang /menu --}}
+    @if ($headerMenus->isNotEmpty())
+        <nav class="header-nav">
+            @foreach ($headerMenus as $menu)
+                <a href="{{ url($menu->url) }}" @class(['active' => $menu->dangChon()])>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">{!! $menu->iconSvg() !!}</svg>
+                    {{ $menu->ten }}
+                </a>
+            @endforeach
+        </nav>
+    @endif
 
     <div class="header-search">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="2">

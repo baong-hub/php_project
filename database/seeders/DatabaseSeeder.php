@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Gọi tới các Seeder con
         $this->call([
             SinhVienSeeder::class,
+            MenuSeeder::class,
         ]);
 
         // Tạo 1 user cố định để test đăng nhập

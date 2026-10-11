@@ -4,11 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SinhVienController;
 use App\Http\Controllers\LopHocController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\DashboardController;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/gioi-thieu', function () {
     return '<h1>Đây là trang Giới thiệu</h1><p>Nội dung tùy ý ở đây</p>';
 });

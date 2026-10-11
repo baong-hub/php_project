@@ -32,59 +32,22 @@
 @endpush
 
 <aside>
-    <nav>
-        <div class="nav-group-label">Tổng quan</div>
-        <ul class="nav-list">
-            <li><a href="{{ url('/') }}" @class(['active' => request()->is('/')])>
-                <span class="icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-                </span>
-                Dashboard
-            </a></li>
-        </ul>
-    </nav>
-
-    <nav>
-        <div class="nav-group-label">Học vụ</div>
-        <ul class="nav-list">
-            <li><a href="{{ route('sinhvien.index') }}" @class(['active' => request()->is('sinhvien*')])>
-                <span class="icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
-                </span>
-                Sinh viên <span class="count">3</span>
-            </a></li>
-            <li><a href="{{ url('/lophoc') }}" @class(['active' => request()->is('lophoc*')])>
-                <span class="icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-                </span>
-                Lớp học
-            </a></li>
-            <li><a href="{{ url('/diem') }}" @class(['active' => request()->is('diem*')])>
-                <span class="icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                </span>
-                Điểm số
-            </a></li>
-        </ul>
-    </nav>
-
-    <nav>
-        <div class="nav-group-label">Hệ thống</div>
-        <ul class="nav-list">
-            <li><a href="{{ route('menu.index') }}" @class(['active' => request()->is('menu*')])>
-                <span class="icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-                </span>
-                Menu
-            </a></li>
-            <li><a href="{{ url('/caidat') }}" @class(['active' => request()->is('caidat*')])>
-                <span class="icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-                </span>
-                Cài đặt
-            </a></li>
-        </ul>
-    </nav>
+    {{-- Menu lấy từ bảng menus (vị trí Sidebar), quản lý tại trang /menu --}}
+    @foreach ($sidebarNhoms as $nhom)
+        <nav>
+            <div class="nav-group-label">{{ $nhom['nhom'] }}</div>
+            <ul class="nav-list">
+                @foreach ($nhom['items'] as $menu)
+                    <li><a href="{{ url($menu->url) }}" @class(['active' => $menu->dangChon()])>
+                        <span class="icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">{!! $menu->iconSvg() !!}</svg>
+                        </span>
+                        {{ $menu->ten }}
+                    </a></li>
+                @endforeach
+            </ul>
+        </nav>
+    @endforeach
 
     <div class="sidebar-divider">
         Học kỳ 1 · Năm học 2026–2027

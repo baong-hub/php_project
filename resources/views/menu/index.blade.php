@@ -54,13 +54,13 @@
 
     <div class="table-toolbar">
         <form class="filter-form" method="GET" action="{{ route('menu.index') }}">
-            <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
-            <input type="hidden" name="sort_by"  value="{{ request('sort_by', 'id') }}">
-            <input type="hidden" name="sort_dir" value="{{ request('sort_dir', 'asc') }}">
+            <input type="hidden" name="per_page" value="{{ $perPage }}">
+            <input type="hidden" name="sort_by"  value="{{ $sortBy }}">
+            <input type="hidden" name="sort_dir" value="{{ $sortDir }}">
 
             <input type="text" name="search"
                    value="{{ request('search') }}"
-                   placeholder="Tìm tên, đường dẫn…">
+                   placeholder="Tìm tên, đường dẫn, nhóm…">
 
             <select name="vi_tri">
                 <option value="">Tất cả vị trí</option>
@@ -77,7 +77,7 @@
 
             <button type="submit" class="btn-filter">Lọc</button>
 
-            @if(request()->hasAny(['search','trang_thai','vi_tri']))
+            @if(request()->anyFilled(['search','trang_thai','vi_tri']))
                 <a href="{{ route('menu.index') }}" class="btn-reset">✕ Xóa lọc</a>
             @endif
         </form>
@@ -86,34 +86,39 @@
     </div>
 
     @php
-        $sortBy  = request('sort_by', 'id');
-        $sortDir = request('sort_dir', 'asc');
-        function mnSortUrl(string $col, string $currentCol, string $currentDir): string {
+        // Dùng closure thay vì function: khai báo function trong view sẽ lỗi
+        // "Cannot redeclare" nếu view được render nhiều lần trong một tiến trình.
+        $mnSortUrl = function (string $col, string $currentCol, string $currentDir): string {
             $dir = ($currentCol === $col && $currentDir === 'asc') ? 'desc' : 'asc';
             return request()->fullUrlWithQuery(['sort_by' => $col, 'sort_dir' => $dir, 'page' => 1]);
-        }
-        function mnSortClass(string $col, string $currentCol, string $currentDir): string {
+        };
+        $mnSortClass = function (string $col, string $currentCol, string $currentDir): string {
             if ($currentCol !== $col) return '';
             return $currentDir === 'asc' ? 'active-asc' : 'active-desc';
-        }
+        };
     @endphp
 
     <table>
         <tr>
-            <th><a href="{{ mnSortUrl('id', $sortBy, $sortDir) }}" class="sort-link {{ mnSortClass('id', $sortBy, $sortDir) }}">#<span class="arrow"></span></a></th>
-            <th><a href="{{ mnSortUrl('ten', $sortBy, $sortDir) }}" class="sort-link {{ mnSortClass('ten', $sortBy, $sortDir) }}">Tên menu <span class="arrow"></span></a></th>
-            <th><a href="{{ mnSortUrl('url', $sortBy, $sortDir) }}" class="sort-link {{ mnSortClass('url', $sortBy, $sortDir) }}">Đường dẫn <span class="arrow"></span></a></th>
-            <th><a href="{{ mnSortUrl('vi_tri', $sortBy, $sortDir) }}" class="sort-link {{ mnSortClass('vi_tri', $sortBy, $sortDir) }}">Vị trí <span class="arrow"></span></a></th>
+            <th><a href="{{ $mnSortUrl('id', $sortBy, $sortDir) }}" class="sort-link {{ $mnSortClass('id', $sortBy, $sortDir) }}">#<span class="arrow"></span></a></th>
+            <th><a href="{{ $mnSortUrl('ten', $sortBy, $sortDir) }}" class="sort-link {{ $mnSortClass('ten', $sortBy, $sortDir) }}">Tên menu <span class="arrow"></span></a></th>
+            <th><a href="{{ $mnSortUrl('url', $sortBy, $sortDir) }}" class="sort-link {{ $mnSortClass('url', $sortBy, $sortDir) }}">Đường dẫn <span class="arrow"></span></a></th>
+            <th><a href="{{ $mnSortUrl('vi_tri', $sortBy, $sortDir) }}" class="sort-link {{ $mnSortClass('vi_tri', $sortBy, $sortDir) }}">Vị trí <span class="arrow"></span></a></th>
             <th>Nhóm</th>
-            <th><a href="{{ mnSortUrl('thu_tu', $sortBy, $sortDir) }}" class="sort-link {{ mnSortClass('thu_tu', $sortBy, $sortDir) }}">Thứ tự <span class="arrow"></span></a></th>
-            <th><a href="{{ mnSortUrl('trang_thai', $sortBy, $sortDir) }}" class="sort-link {{ mnSortClass('trang_thai', $sortBy, $sortDir) }}">Trạng thái <span class="arrow"></span></a></th>
+            <th><a href="{{ $mnSortUrl('thu_tu', $sortBy, $sortDir) }}" class="sort-link {{ $mnSortClass('thu_tu', $sortBy, $sortDir) }}">Thứ tự <span class="arrow"></span></a></th>
+            <th><a href="{{ $mnSortUrl('trang_thai', $sortBy, $sortDir) }}" class="sort-link {{ $mnSortClass('trang_thai', $sortBy, $sortDir) }}">Trạng thái <span class="arrow"></span></a></th>
             <th>Thao tác</th>
         </tr>
 
         @forelse ($menus as $menu)
         <tr>
             <td>{{ $menu->id }}</td>
-            <td>{{ $menu->ten }}</td>
+            <td>
+                <span style="display:inline-flex; align-items:center; gap:8px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">{!! $menu->iconSvg() !!}</svg>
+                    {{ $menu->ten }}
+                </span>
+            </td>
             <td><span class="slug-chip">{{ $menu->url }}</span></td>
             <td>{{ $viTriOptions[$menu->vi_tri] ?? $menu->vi_tri }}</td>
             <td>{{ $menu->nhom ?: '—' }}</td>
@@ -160,9 +165,9 @@
                     url.searchParams.delete('page');
                     window.location.href = url.toString();
                 ">
-                <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 / trang</option>
-                <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25 / trang</option>
-                <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 / trang</option>
+                <option value="10" {{ $perPage === 10 ? 'selected' : '' }}>10 / trang</option>
+                <option value="25" {{ $perPage === 25 ? 'selected' : '' }}>25 / trang</option>
+                <option value="50" {{ $perPage === 50 ? 'selected' : '' }}>50 / trang</option>
             </select>
 
             {{ $menus->links() }}

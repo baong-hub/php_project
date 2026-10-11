@@ -34,6 +34,7 @@ class StoreMenuRequest extends FormRequest
     {
         return [
             'ten' => 'required|string|max:100',
+            'icon' => ['nullable', Rule::in(array_keys(Menu::ICONS))],
             // Rule regex có chứa dấu | nên phải viết dạng mảng thay vì chuỗi ngăn cách bằng |
             'url' => ['required', 'string', 'max:255', 'regex:/^(\/|#|https?:\/\/)/'],
             'vi_tri' => ['required', Rule::in(array_keys(Menu::VI_TRI))],
@@ -67,6 +68,7 @@ class StoreMenuRequest extends FormRequest
     {
         return [
             'ten' => 'Tên menu',
+            'icon' => 'Icon',
             'url' => 'Đường dẫn',
             'vi_tri' => 'Vị trí',
             'nhom' => 'Nhóm',

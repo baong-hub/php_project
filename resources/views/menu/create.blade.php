@@ -38,6 +38,16 @@
             </div>
 
             <div class="form-group">
+                <label for="icon">Icon</label>
+                <select id="icon" name="icon">
+                    <option value="">— Mặc định —</option>
+                    @foreach ($iconOptions as $key => [$label])
+                        <option value="{{ $key }}" {{ old('icon') === $key ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label for="url">Đường dẫn</label>
                 <input type="text" id="url" name="url"
                        value="{{ old('url') }}" placeholder="/sinhvien">

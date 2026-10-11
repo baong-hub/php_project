@@ -11,12 +11,18 @@ class MenuController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage   = $request->input('per_page', 10);
-        $search    = $request->input('search', '');
-        $trangThai = $request->input('trang_thai', '');
-        $viTri     = $request->input('vi_tri', '');
+        // Ô lọc để trống được Laravel đổi thành null (ConvertEmptyStringsToNull),
+        // nên dùng filled() thay vì so sánh với '' để không lọc nhầm theo null.
+        $perPage   = (int) $request->input('per_page', 10);
+        $search    = trim((string) $request->input('search', ''));
+        $trangThai = (string) $request->input('trang_thai', '');
+        $viTri     = (string) $request->input('vi_tri', '');
         $sortBy    = $request->input('sort_by', 'id');
         $sortDir   = $request->input('sort_dir', 'asc');
+
+        if (!in_array($perPage, [10, 25, 50], true)) {
+            $perPage = 10;
+        }
 
         $allowedSorts = ['id', 'ten', 'url', 'vi_tri', 'thu_tu', 'trang_thai'];
         if (!in_array($sortBy, $allowedSorts)) {
@@ -29,15 +35,16 @@ class MenuController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('ten', 'like', "%{$search}%")
-                  ->orWhere('url', 'like', "%{$search}%");
+                  ->orWhere('url', 'like', "%{$search}%")
+                  ->orWhere('nhom', 'like', "%{$search}%");
             });
         }
 
-        if ($trangThai !== '') {
-            $query->where('trang_thai', (bool) $trangThai);
+        if (in_array($trangThai, ['0', '1'], true)) {
+            $query->where('trang_thai', $trangThai === '1');
         }
 
-        if ($viTri !== '') {
+        if (array_key_exists($viTri, Menu::VI_TRI)) {
             $query->where('vi_tri', $viTri);
         }
 
@@ -48,6 +55,9 @@ class MenuController extends Controller
         return view('menu.index', [
             'title' => 'Danh sách Menu',
             'menus' => $menus,
+            'sortBy' => $sortBy,
+            'sortDir' => $sortDir,
+            'perPage' => $perPage,
             'viTriOptions' => Menu::VI_TRI,
         ]);
     }
@@ -57,6 +67,7 @@ class MenuController extends Controller
         return view('menu.create', [
             'title'        => 'Thêm Menu',
             'viTriOptions' => Menu::VI_TRI,
+            'iconOptions'  => Menu::ICONS,
         ]);
     }
 
@@ -80,6 +91,7 @@ class MenuController extends Controller
             'title'        => 'Sửa Menu',
             'menu'         => $menu,
             'viTriOptions' => Menu::VI_TRI,
+            'iconOptions'  => Menu::ICONS,
         ]);
     }
 
