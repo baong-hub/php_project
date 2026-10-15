@@ -24,6 +24,7 @@ class StoreMenuRequest extends FormRequest
     {
         $this->merge([
             'trang_thai' => $this->boolean('trang_thai'),
+            'chi_admin' => $this->boolean('chi_admin'),
         ]);
     }
 
@@ -41,6 +42,7 @@ class StoreMenuRequest extends FormRequest
             'nhom' => 'nullable|string|max:100',
             'thu_tu' => 'required|integer|min:0',
             'trang_thai' => 'required|boolean',
+            'chi_admin' => 'required|boolean',
         ];
     }
 
@@ -74,6 +76,7 @@ class StoreMenuRequest extends FormRequest
             'nhom' => 'Nhóm',
             'thu_tu' => 'Thứ tự',
             'trang_thai' => 'Trạng thái',
+            'chi_admin' => 'Chỉ admin',
         ];
     }
 }

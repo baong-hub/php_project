@@ -55,11 +55,19 @@
             <div class="stat-value">{{ $thongKe['lopHoc'] ? number_format($thongKe['sinhVien'] / $thongKe['lopHoc'], 1) : 0 }}</div>
             <div class="stat-note">Tính trên tất cả lớp</div>
         </a>
-        <a href="{{ route('menu.index') }}" class="stat-card">
-            <div class="stat-label">Menu</div>
-            <div class="stat-value">{{ number_format($thongKe['menu']) }}</div>
-            <div class="stat-note">Mục menu trong hệ thống</div>
-        </a>
+        @if (auth()->user()->isAdmin())
+            <a href="{{ route('nguoidung.index') }}" class="stat-card">
+                <div class="stat-label">Người dùng</div>
+                <div class="stat-value">{{ number_format($thongKe['nguoiDung']) }}</div>
+                <div class="stat-note">{{ number_format($thongKe['giangVien']) }} giảng viên</div>
+            </a>
+        @else
+            <a href="{{ route('lophoc.index') }}" class="stat-card">
+                <div class="stat-label">Lớp đang hoạt động</div>
+                <div class="stat-value">{{ number_format($thongKe['lopDangHoatDong']) }}</div>
+                <div class="stat-note">Trên tổng {{ number_format($thongKe['lopHoc']) }} lớp</div>
+            </a>
+        @endif
     </div>
 
     <div class="panel-grid">

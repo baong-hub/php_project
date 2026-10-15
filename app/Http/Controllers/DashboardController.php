@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\LopHoc;
-use App\Models\Menu;
 use App\Models\SinhVien;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -16,7 +16,9 @@ class DashboardController extends Controller
                 'sinhVien'        => SinhVien::count(),
                 'sinhVienDangHoc' => SinhVien::where('trang_thai', true)->count(),
                 'lopHoc'          => LopHoc::count(),
-                'menu'            => Menu::count(),
+                'lopDangHoatDong' => LopHoc::where('trang_thai', true)->count(),
+                'nguoiDung'       => User::count(),
+                'giangVien'       => User::where('role', User::ROLE_GIANG_VIEN)->count(),
             ],
             // 5 sinh viên mới thêm gần nhất
             'sinhVienMoi' => SinhVien::with('lopHoc')->latest('id')->take(5)->get(),

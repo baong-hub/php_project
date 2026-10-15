@@ -28,6 +28,8 @@ class Menu extends Model
         'calendar' => ['Lịch', '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'],
         'menu' => ['Danh sách', '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>'],
         'settings' => ['Cài đặt', '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>'],
+        'users' => ['Nhóm người', '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'],
+        'key' => ['Chìa khóa', '<circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3L22 7l-3-3"/>'],
         'link' => ['Liên kết', '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'],
     ];
 
@@ -41,15 +43,23 @@ class Menu extends Model
         'nhom',
         'thu_tu',
         'trang_thai',
+        'chi_admin',
+    ];
+
+    protected $casts = [
+        'trang_thai' => 'boolean',
+        'chi_admin' => 'boolean',
     ];
 
     /**
      * Các menu đang hiển thị ở một vị trí, sắp theo thứ tự.
+     * Menu "chỉ admin" bị ẩn với người không phải admin.
      */
-    public static function dangHienThi(string $viTri): Collection
+    public static function dangHienThi(string $viTri, ?User $user = null): Collection
     {
         return static::where('vi_tri', $viTri)
             ->where('trang_thai', true)
+            ->when(!$user?->isAdmin(), fn ($q) => $q->where('chi_admin', false))
             ->orderBy('thu_tu')
             ->orderBy('id')
             ->get();
@@ -59,9 +69,9 @@ class Menu extends Model
      * Gom menu sidebar theo nhóm (không phân biệt hoa thường).
      * Nhóm xuất hiện theo thứ tự của menu đầu tiên trong nhóm.
      */
-    public static function sidebarTheoNhom(): Collection
+    public static function sidebarTheoNhom(?User $user = null): Collection
     {
-        return static::dangHienThi('sidebar')
+        return static::dangHienThi('sidebar', $user)
             ->groupBy(fn (Menu $menu) => mb_strtolower(trim((string) $menu->nhom)))
             ->map(fn (Collection $items) => [
                 'nhom' => $items->first()->nhom ?: 'Khác',

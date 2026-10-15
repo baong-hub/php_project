@@ -20,9 +20,13 @@ class StoreLopHocRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'trang_thai' => $this->boolean('trang_thai'),
-        ]);
+        // Form web: checkbox bỏ tick thì không được gửi lên -> coi là 0.
+        // API (JSON): chỉ chuẩn hóa khi client có gửi, thiếu thì báo lỗi thay vì ngầm tắt.
+        if (!$this->is('api/*') || $this->has('trang_thai')) {
+            $this->merge([
+                'trang_thai' => $this->boolean('trang_thai'),
+            ]);
+        }
     }
 
     /**
@@ -32,7 +36,7 @@ class StoreLopHocRequest extends FormRequest
     {
         return [
             'ten_lop' => 'required|string|max:255',
-            'ma_lop' => 'required|string|max:6|unique:lop_hocs,ma_lop',
+            'ma_lop' => 'required|string|max:20|unique:lop_hocs,ma_lop',
             'giao_vien' => 'required|string|max:255',
             'so_dien_thoai_gvcn' => 'nullable|string|max:20',
             'ghi_chu' => 'nullable|string|max:500',

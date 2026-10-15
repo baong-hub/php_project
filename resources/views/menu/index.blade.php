@@ -9,6 +9,7 @@
     .badge{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:11.5px; font-weight:600; }
     .badge-active{ background:#DFF3E3; color:#1E7B3C; }
     .badge-inactive{ background:#FBEAEA; color:#A33; }
+    .badge-admin{ background:#E7EAF6; color:var(--navy-2); }
 
     .table-toolbar{ display:flex; align-items:center; gap:10px; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; }
     .filter-form{ display:flex; gap:8px; flex-wrap:wrap; flex:1; }
@@ -128,6 +129,9 @@
                     <span class="badge badge-active">Đang hiển thị</span>
                 @else
                     <span class="badge badge-inactive">Đã ẩn</span>
+                @endif
+                @if ($menu->chi_admin)
+                    <span class="badge badge-admin">Chỉ admin</span>
                 @endif
             </td>
             <td>

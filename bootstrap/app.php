@@ -5,6 +5,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use App\Http\Middleware\CheckGioHanhChinh as CheckGioHanhChinhMiddleware;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CheckTaiKhoanHoatDong;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,8 +18,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'gio.hanh.chinh' => CheckGioHanhChinhMiddleware::class
+            'gio.hanh.chinh' => CheckGioHanhChinhMiddleware::class,
+            'role' => CheckRole::class,
+            'tai.khoan.hoat.dong' => CheckTaiKhoanHoatDong::class,
         ]);
+
+        // Chưa đăng nhập -> trang đăng nhập; đã đăng nhập mà vào trang khách -> dashboard
+        $middleware->redirectGuestsTo(fn () => route('login'));
+        $middleware->redirectUsersTo(fn () => route('dashboard'));
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {

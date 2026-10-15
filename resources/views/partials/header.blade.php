@@ -38,6 +38,14 @@
     }
     .header-user .name{ font-size:13px; font-weight:600; color:#F5F1E8; }
     .header-user .role{ font-size:11px; color:#9FA8C9; }
+    .header-user-link{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .header-user-link:hover .name{ color:var(--gold); }
+    .btn-logout{
+        display:flex; align-items:center; justify-content:center; width:34px; height:34px; margin-left:6px;
+        background:transparent; border:1px solid var(--navy-border); border-radius:8px; color:#9FA8C9; cursor:pointer;
+        transition:border-color .15s ease, color .15s ease;
+    }
+    .btn-logout:hover{ border-color:var(--gold); color:var(--gold); }
     .header-nav{ display:flex; align-items:center; gap:4px; margin-left:28px; }
     .header-nav a{
         display:flex; align-items:center; gap:7px; padding:7px 11px; border-radius:7px;
@@ -82,10 +90,18 @@
     </div>
 
     <div class="header-user">
-        <div class="avatar">AD</div>
-        <div>
-            <div class="name">ADMIN</div>
-            <div class="role">Quản trị viên</div>
-        </div>
+        <a href="{{ route('taikhoan.edit') }}" class="header-user-link" title="Tài khoản của tôi">
+            <div class="avatar">{{ auth()->user()->vietTat() }}</div>
+            <div>
+                <div class="name">{{ auth()->user()->name }}</div>
+                <div class="role">{{ auth()->user()->tenVaiTro() }}</div>
+            </div>
+        </a>
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn-logout" title="Đăng xuất">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+        </form>
     </div>
 </header>

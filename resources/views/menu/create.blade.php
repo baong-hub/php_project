@@ -82,6 +82,12 @@
                 <label for="trang_thai">Đang hiển thị</label>
             </div>
 
+            <div class="form-check">
+                <input type="checkbox" id="chi_admin" name="chi_admin" value="1"
+                       {{ old('chi_admin', false) ? 'checked' : '' }}>
+                <label for="chi_admin">Chỉ admin mới thấy</label>
+            </div>
+
             <div class="form-actions">
                 <button type="submit" class="btn-submit">Lưu menu</button>
                 <a href="{{ route('menu.index') }}" class="btn-cancel">Hủy</a>

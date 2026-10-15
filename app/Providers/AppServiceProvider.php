@@ -27,11 +27,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Menu động lấy từ bảng menus (quản lý tại trang /menu)
         View::composer('partials.sidebar', function ($view) {
-            $view->with('sidebarNhoms', Menu::sidebarTheoNhom());
+            $view->with('sidebarNhoms', Menu::sidebarTheoNhom(auth()->user()));
         });
 
         View::composer('partials.header', function ($view) {
-            $view->with('headerMenus', Menu::dangHienThi('header'));
+            $view->with('headerMenus', Menu::dangHienThi('header', auth()->user()));
         });
     }
 }

@@ -3,12 +3,21 @@
 namespace Tests\Feature;
 
 use App\Models\LopHoc;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Các trang quản lý yêu cầu đăng nhập
+        $this->actingAs(User::factory()->admin()->create());
+    }
 
     public function test_trang_chu_hien_thi_dashboard(): void
     {

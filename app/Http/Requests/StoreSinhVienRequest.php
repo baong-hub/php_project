@@ -12,9 +12,13 @@ class StoreSinhVienRequest extends FormRequest
      */
     protected function prepareForValidation(): void
     {
-        $this->merge([
-            'trang_thai' => $this->boolean('trang_thai'),
-        ]);
+        // Form web: checkbox bỏ tick thì không được gửi lên -> coi là 0.
+        // API (JSON): chỉ chuẩn hóa khi client có gửi, thiếu thì báo lỗi thay vì ngầm tắt.
+        if (!$this->is('api/*') || $this->has('trang_thai')) {
+            $this->merge([
+                'trang_thai' => $this->boolean('trang_thai'),
+            ]);
+        }
     }
 
     public function rules(): array

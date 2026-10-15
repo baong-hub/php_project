@@ -55,17 +55,22 @@
     padding:4px 10px; border-radius:6px; font-size:12px; color:var(--navy);
   }
 
+  /* Khách (chưa đăng nhập): bỏ header + sidebar, nội dung chiếm toàn bộ */
+  body.guest{ grid-template-rows:1fr 48px; grid-template-columns:1fr; grid-template-areas: "main" "footer"; }
+
   @media (max-width: 860px){
-    body{ grid-template-columns:1fr; grid-template-areas: "header" "main" "footer"; }
+    body:not(.guest){ grid-template-columns:1fr; grid-template-areas: "header" "main" "footer"; }
   }
 </style>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 </head>
-<body>
+<body @class(['guest' => !auth()->check()])>
 
-    @include('partials.header')
-    @include('partials.sidebar')
+    @auth
+        @include('partials.header')
+        @include('partials.sidebar')
+    @endauth
 
     <main>
         @yield('content')

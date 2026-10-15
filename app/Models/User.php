@@ -3,19 +3,37 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
+
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_GIANG_VIEN = 'giang_vien';
+
+    // Các nhóm người dùng: khóa => tên hiển thị
+    public const ROLES = [
+        self::ROLE_ADMIN => 'Quản trị viên',
+        self::ROLE_GIANG_VIEN => 'Giảng viên',
+    ];
+
+    // Laravel 11 không hỗ trợ attribute #[Fillable]/#[Hidden], phải khai báo bằng thuộc tính
+    protected $fillable = [
+        'name',
+        'email',
+        'role',
+        'trang_thai',
+        'password',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
     /**
      * Get the attributes that should be cast.
@@ -27,6 +45,29 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'trang_thai' => 'boolean',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function tenVaiTro(): string
+    {
+        return self::ROLES[$this->role] ?? $this->role;
+    }
+
+    /**
+     * Chữ viết tắt hiển thị trong avatar (vd: "Nguyễn Văn An" => "NA").
+     */
+    public function vietTat(): string
+    {
+        $words = preg_split('/\s+/u', trim($this->name)) ?: [];
+        $first = mb_substr($words[0] ?? '', 0, 1);
+        $last = count($words) > 1 ? mb_substr(end($words), 0, 1) : '';
+
+        return mb_strtoupper($first . $last);
     }
 }

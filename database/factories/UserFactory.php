@@ -20,11 +20,33 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
+            'role' => User::ROLE_GIANG_VIEN,
+            'trang_thai' => true,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
 
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_ADMIN,
+        ]);
+    }
+
+    public function giangVien(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => User::ROLE_GIANG_VIEN,
+        ]);
+    }
+
+    public function biKhoa(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'trang_thai' => false,
+        ]);
+    }
 
     public function unverified(): static
     {
