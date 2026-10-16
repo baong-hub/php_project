@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSinhVienRequest extends FormRequest
 {
@@ -29,11 +30,27 @@ class StoreSinhVienRequest extends FormRequest
             'email'         => 'required|email|max:255|unique:sinh_viens,email',
             'ngay_sinh'     => 'nullable|date',
             'gioi_tinh'     => 'required|boolean',
-            'lop_hoc_id'    => 'nullable|exists:lop_hocs,id',
+            'lop_hoc_id'    => $this->lopHocRules(),
             'so_dien_thoai' => 'nullable|string|max:20',
             'dia_chi'       => 'nullable|string',
             'trang_thai'    => 'required|boolean',
         ];
+    }
+
+    /**
+     * Admin: lớp không bắt buộc (cho phép "chưa xếp lớp").
+     * Giảng viên: bắt buộc chọn một lớp mình chủ nhiệm, nếu không sinh viên sẽ nằm ngoài phạm vi quản lý.
+     */
+    protected function lopHocRules(): array
+    {
+        if ($this->user()?->isAdmin() === false) {
+            return [
+                'required',
+                Rule::exists('lop_hocs', 'id')->where('giang_vien_id', $this->user()->id),
+            ];
+        }
+
+        return ['nullable', 'exists:lop_hocs,id'];
     }
 
     public function messages(): array
@@ -47,7 +64,9 @@ class StoreSinhVienRequest extends FormRequest
             'email' => ':attribute không đúng định dạng.',
             'ma_sv.unique' => 'Mã sinh viên này đã tồn tại.',
             'email.unique' => 'Email này đã tồn tại.',
-            'lop_hoc_id.exists' => 'Lớp học không tồn tại.',
+            'lop_hoc_id.exists' => $this->user()?->isAdmin() === false
+                ? 'Bạn chỉ được chọn lớp do mình chủ nhiệm.'
+                : 'Lớp học không tồn tại.',
         ];
     }
 

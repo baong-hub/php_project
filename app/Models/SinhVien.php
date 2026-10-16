@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,5 +30,17 @@ class SinhVien extends Model
     public function lopHoc()
     {
         return $this->belongsTo(LopHoc::class, 'lop_hoc_id');
+    }
+
+    /**
+     * Các sinh viên người dùng được quản lý: admin thấy tất cả,
+     * giảng viên chỉ thấy sinh viên thuộc các lớp mình chủ nhiệm.
+     */
+    public function scopeCuaNguoiDung(Builder $query, User $user): Builder
+    {
+        return $query->when(!$user->isAdmin(), fn ($q) => $q->whereIn(
+            'sinh_viens.lop_hoc_id',
+            LopHoc::select('id')->where('giang_vien_id', $user->id)
+        ));
     }
 }

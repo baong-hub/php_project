@@ -39,7 +39,8 @@ class SinhVienController extends Controller
             'per_page.in' => 'Số dòng mỗi trang chỉ được chọn 10, 25 hoặc 50.',
         ]);
 
-        $query = SinhVien::with('lopHoc');
+        // Giảng viên chỉ thấy sinh viên thuộc lớp mình chủ nhiệm
+        $query = SinhVien::with('lopHoc')->cuaNguoiDung($request->user());
         $search = trim($filters['search'] ?? '');
 
         if ($search !== '') {
@@ -81,7 +82,7 @@ class SinhVienController extends Controller
         }
 
         $sinhviens = $query->orderBy('sinh_viens.id')->paginate($perPage)->withQueryString();
-        $lophocs = LopHoc::query()->orderBy('ten_lop')->get(['id', 'ten_lop', 'ma_lop']);
+        $lophocs = LopHoc::cuaNguoiDung($request->user())->orderBy('ten_lop')->get(['id', 'ten_lop', 'ma_lop']);
 
         return view('sinhvien.index', [
             'title'     => 'Danh sách sinh viên',
@@ -93,9 +94,9 @@ class SinhVienController extends Controller
     /**
      * Hiển thị form thêm sinh viên
      */
-    public function create()
+    public function create(Request $request)
     {
-        $lophocs = LopHoc::where('trang_thai', 1)->get();
+        $lophocs = LopHoc::cuaNguoiDung($request->user())->where('trang_thai', 1)->get();
 
         return view('sinhvien.create', [
             'title'   => 'Thêm sinh viên',
@@ -106,9 +107,9 @@ class SinhVienController extends Controller
     /**
      * Hiển thị thông tin chi tiết sinh viên.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $sinhvien = SinhVien::with('lopHoc')->findOrFail($id);
+        $sinhvien = SinhVien::with('lopHoc')->cuaNguoiDung($request->user())->findOrFail($id);
 
         return view('sinhvien.show', [
             'title' => 'Chi tiết sinh viên',
@@ -138,10 +139,10 @@ class SinhVienController extends Controller
     /**
      * Hiển thị form sửa sinh viên
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
-        $sinhvien = SinhVien::findOrFail($id);
-        $lophocs  = LopHoc::where('trang_thai', 1)->get();
+        $sinhvien = SinhVien::cuaNguoiDung($request->user())->findOrFail($id);
+        $lophocs  = LopHoc::cuaNguoiDung($request->user())->where('trang_thai', 1)->get();
 
         return view('sinhvien.edit', [
             'title'    => 'Sửa sinh viên',
@@ -155,7 +156,7 @@ class SinhVienController extends Controller
      */
     public function update(UpdateSinhVienRequest $request, $id)
     {
-        $sinhvien = SinhVien::findOrFail($id);
+        $sinhvien = SinhVien::cuaNguoiDung($request->user())->findOrFail($id);
 
         $sinhvien->update($request->validated());
 
@@ -166,9 +167,9 @@ class SinhVienController extends Controller
     /**
      * Xóa sinh viên
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $sinhvien = SinhVien::findOrFail($id);
+        $sinhvien = SinhVien::cuaNguoiDung($request->user())->findOrFail($id);
         $sinhvien->delete();
 
         return redirect()->route('sinhvien.index')

@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 use App\Models\LopHoc;
 use App\Models\SinhVien;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    // Không dùng WithoutModelEvents: LopHoc cần event "saving" để điền tên giảng viên
 
     public function run(): void
     {
@@ -23,8 +23,11 @@ class DatabaseSeeder extends Seeder
         // Sinh thêm dữ liệu ngẫu nhiên bằng factory: 5 lớp, mỗi lớp 4 sinh viên.
         // Chỉ chạy lần đầu để chạy lại seeder không bị nhân đôi dữ liệu.
         if (LopHoc::count() <= 20) {
+            $giangVienIds = User::where('role', User::ROLE_GIANG_VIEN)->pluck('id');
+
             LopHoc::factory()
                 ->count(5)
+                ->state(fn () => ['giang_vien_id' => $giangVienIds->random()])
                 ->has(SinhVien::factory()->count(4))
                 ->create();
         }

@@ -71,10 +71,12 @@ class LopHocTest extends TestCase
 
     public function test_can_store_new_lop_hoc(): void
     {
+        $giangVien = User::factory()->giangVien()->create(['name' => 'Phạm Văn D']);
+
         $payload = [
             'ten_lop' => 'Lớp Điện Tử 01',
             'ma_lop' => 'DT01',
-            'giao_vien' => 'Phạm Văn D',
+            'giang_vien_id' => $giangVien->id,
             'si_so' => 35,
             'trang_thai' => '1',
         ];
@@ -85,6 +87,8 @@ class LopHocTest extends TestCase
         $this->assertDatabaseHas('lop_hocs', [
             'ma_lop' => 'DT01',
             'ten_lop' => 'Lớp Điện Tử 01',
+            'giang_vien_id' => $giangVien->id,
+            'giao_vien' => 'Phạm Văn D',
         ]);
     }
 
@@ -124,7 +128,7 @@ class LopHocTest extends TestCase
         $payload = [
             'ten_lop' => 'Lớp Mới Cập Nhật',
             'ma_lop' => 'OLD01',
-            'giao_vien' => 'Cô E',
+            'giang_vien_id' => User::factory()->giangVien()->create()->id,
             'si_so' => 28,
             'trang_thai' => '1',
         ];

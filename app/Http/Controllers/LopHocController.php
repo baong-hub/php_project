@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\LopHoc;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Requests\StoreLopHocRequest;
@@ -131,7 +132,9 @@ class LopHocController extends Controller
          * ==========================
          */
 
+        // Giảng viên chỉ thấy lớp mình chủ nhiệm
         $query = LopHoc::query()
+            ->cuaNguoiDung($request->user())
 
             // Tìm kiếm theo mã lớp, tên lớp, giáo viên.
             ->when($search !== '', function ($query) use ($search) {
@@ -211,13 +214,14 @@ class LopHocController extends Controller
     public function create()
     {
         return view('lophoc.create', [
-            'title' => 'Thêm lớp học'
+            'title' => 'Thêm lớp học',
+            'giangViens' => $this->danhSachGiangVien(),
         ]);
     }
 
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $lophoc = LopHoc::findOrFail($id);
+        $lophoc = LopHoc::cuaNguoiDung($request->user())->findOrFail($id);
         return view('lophoc.show', [
             'title'  => 'Chi tiết lớp học',
             'lophoc' => $lophoc
@@ -253,18 +257,19 @@ class LopHocController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
-        $lophoc = LopHoc::findOrFail($id);
+        $lophoc = LopHoc::cuaNguoiDung($request->user())->findOrFail($id);
 
         return view('lophoc.edit', [
             'title'  => 'Sửa lớp học',
-            'lophoc' => $lophoc
+            'lophoc' => $lophoc,
+            'giangViens' => $this->danhSachGiangVien(),
         ]);
     }
     public function update(UpdateLopHocRequest $request, $id)
     {
-        $lophoc = LopHoc::findOrFail($id);
+        $lophoc = LopHoc::cuaNguoiDung($request->user())->findOrFail($id);
 
         $lophoc->update($request->validated());
 
@@ -272,12 +277,23 @@ class LopHocController extends Controller
             ->with('success', 'Cập nhật lớp học thành công!');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $lophoc = LopHoc::findOrFail($id);
+        $lophoc = LopHoc::cuaNguoiDung($request->user())->findOrFail($id);
         $lophoc->delete();
 
         // back() để giữ nguyên bộ lọc/sắp xếp đang xem
         return back()->with('success', 'Lớp học đã được xóa.');
+    }
+
+    /**
+     * Giảng viên đang hoạt động để admin chọn làm chủ nhiệm.
+     */
+    private function danhSachGiangVien()
+    {
+        return User::where('role', User::ROLE_GIANG_VIEN)
+            ->where('trang_thai', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'email']);
     }
 }

@@ -43,11 +43,13 @@ Route::middleware(['auth', 'tai.khoan.hoat.dong'])->group(function () {
     Route::get('/lophoc/{id}', [LopHocController::class, 'show'])->name('lophoc.show');
     Route::get('/lophoc/{id}/sua', [LopHocController::class, 'edit'])->name('lophoc.edit');
     Route::put('/lophoc/{id}', [LopHocController::class, 'update'])->name('lophoc.update');
-    Route::delete('/lophoc/{id}', [LopHocController::class, 'destroy'])->name('lophoc.destroy');
 
 
     // chỉ admin
     Route::middleware('role:admin')->group(function () {
+        // xóa lớp: giảng viên chỉ được thêm/sửa lớp mình chủ nhiệm, không được xóa
+        Route::delete('/lophoc/{id}', [LopHocController::class, 'destroy'])->name('lophoc.destroy');
+
         // menu
         Route::get('/menu', [MenuController::class, 'index'])->name('menu.index');
         Route::get('/menu/them', [MenuController::class, 'create'])->name('menu.create');

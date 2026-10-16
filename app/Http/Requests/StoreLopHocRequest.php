@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreLopHocRequest extends FormRequest
 {
@@ -27,6 +29,11 @@ class StoreLopHocRequest extends FormRequest
                 'trang_thai' => $this->boolean('trang_thai'),
             ]);
         }
+
+        // Giảng viên chỉ tạo/sửa lớp do chính mình chủ nhiệm, không gán cho người khác
+        if ($this->user() && !$this->user()->isAdmin()) {
+            $this->merge(['giang_vien_id' => $this->user()->id]);
+        }
     }
 
     /**
@@ -37,7 +44,11 @@ class StoreLopHocRequest extends FormRequest
         return [
             'ten_lop' => 'required|string|max:255',
             'ma_lop' => 'required|string|max:20|unique:lop_hocs,ma_lop',
-            'giao_vien' => 'required|string|max:255',
+            'giang_vien_id' => [
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->where('role', User::ROLE_GIANG_VIEN),
+            ],
             'so_dien_thoai_gvcn' => 'nullable|string|max:20',
             'ghi_chu' => 'nullable|string|max:500',
             'si_so' => 'required|integer|min:1',
@@ -57,6 +68,8 @@ class StoreLopHocRequest extends FormRequest
             'integer' => ':attribute phải là số nguyên.',
             'boolean' => ':attribute không hợp lệ.',
             'ma_lop.unique' => 'Mã lớp này đã tồn tại.',
+            'giang_vien_id.required' => 'Vui lòng chọn giảng viên chủ nhiệm.',
+            'giang_vien_id.exists' => 'Giảng viên chủ nhiệm không hợp lệ.',
             'si_so.min' => 'Sĩ số phải từ :min trở lên.',
         ];
     }
@@ -69,7 +82,7 @@ class StoreLopHocRequest extends FormRequest
         return [
             'ten_lop' => 'Tên lớp',
             'ma_lop' => 'Mã lớp',
-            'giao_vien' => 'Giáo viên',
+            'giang_vien_id' => 'Giảng viên chủ nhiệm',
             'so_dien_thoai_gvcn' => 'Số điện thoại GVCN',
             'ghi_chu' => 'Ghi chú',
             'si_so' => 'Sĩ số',

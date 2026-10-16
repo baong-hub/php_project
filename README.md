@@ -27,8 +27,8 @@ Chạy test: `php artisan test`
 | Chức năng | Đường dẫn | Admin | Giảng viên |
 |---|---|:---:|:---:|
 | Dashboard | `/` | ✓ | ✓ |
-| Quản lý lớp học | `/lophoc` | ✓ | ✓ |
-| Quản lý sinh viên | `/sinhvien` | ✓ | ✓ |
+| Quản lý lớp học | `/lophoc` | ✓ tất cả lớp | ✓ lớp mình chủ nhiệm |
+| Quản lý sinh viên | `/sinhvien` | ✓ tất cả sinh viên | ✓ sinh viên lớp mình chủ nhiệm |
 | Tài khoản của tôi | `/taikhoan` | ✓ | ✓ |
 | Quản lý menu | `/menu` | ✓ | ✗ (403) |
 | Quản lý người dùng | `/nguoidung` | ✓ | ✗ (403) |
@@ -37,6 +37,10 @@ Chạy test: `php artisan test`
 - Form thêm/sửa được validate bằng các lớp trong `app/Http/Requests`.
 - Sidebar lấy từ bảng `menus`. Menu đánh dấu "Chỉ admin" sẽ bị ẩn với giảng viên.
 - Admin không thể tự xóa, tự khóa hoặc tự hạ quyền tài khoản của chính mình.
+- Mỗi lớp có một giảng viên chủ nhiệm (`lop_hocs.giang_vien_id`). Admin chọn giảng viên khi tạo/sửa lớp; giảng viên tạo lớp thì lớp tự thuộc về mình.
+- Giảng viên chỉ thấy, thêm, sửa lớp mình chủ nhiệm và sinh viên của các lớp đó (web, API và Dashboard). Truy cập lớp/sinh viên của người khác trả về 404.
+- Chỉ admin được xóa lớp (giảng viên gọi xóa sẽ nhận 403, nút Xóa lớp bị ẩn). Giảng viên vẫn được xóa sinh viên trong lớp mình.
+- Khi thêm/sửa sinh viên, giảng viên bắt buộc chọn một lớp mình chủ nhiệm.
 
 ## Middleware
 
@@ -62,7 +66,7 @@ Mọi phản hồi có dạng `{ "success": bool, "message": string, "data": ...
 | POST | `/api/lop-hoc` | Thêm lớp |
 | GET | `/api/lop-hoc/{id}` | Chi tiết lớp (kèm số sinh viên) |
 | PUT | `/api/lop-hoc/{id}` | Cập nhật lớp |
-| DELETE | `/api/lop-hoc/{id}` | Xóa lớp |
+| DELETE | `/api/lop-hoc/{id}` | Xóa lớp (chỉ admin) |
 | GET | `/api/sinh-vien` | Danh sách sinh viên: `search`, `lop_hoc_id`, `gioi_tinh`, `trang_thai`, `sort_by`, `sort_dir`, `per_page`, `page` |
 | POST | `/api/sinh-vien` | Thêm sinh viên |
 | GET | `/api/sinh-vien/{id}` | Chi tiết sinh viên (kèm lớp) |

@@ -49,6 +49,24 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        // Đổi tên giảng viên thì cập nhật luôn tên hiển thị ở các lớp chủ nhiệm
+        static::updated(function (User $user) {
+            if ($user->wasChanged('name')) {
+                LopHoc::where('giang_vien_id', $user->id)->update(['giao_vien' => $user->name]);
+            }
+        });
+    }
+
+    /**
+     * Các lớp giảng viên này chủ nhiệm
+     */
+    public function lopChuNhiem()
+    {
+        return $this->hasMany(LopHoc::class, 'giang_vien_id');
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === self::ROLE_ADMIN;

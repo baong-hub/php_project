@@ -15,7 +15,10 @@ Route::middleware(['auth:sanctum', 'tai.khoan.hoat.dong'])->group(function () {
 
     // Admin và giảng viên đều quản lý được lớp học, sinh viên (chỉ trong giờ hành chính)
     Route::middleware(['role:admin,giang_vien', 'gio.hanh.chinh'])->group(function () {
-        Route::apiResource('lop-hoc', LopHocController::class)->parameters(['lop-hoc' => 'id']);
+        Route::apiResource('lop-hoc', LopHocController::class)->parameters(['lop-hoc' => 'id'])->except('destroy');
         Route::apiResource('sinh-vien', SinhVienController::class)->parameters(['sinh-vien' => 'id']);
+
+        // Chỉ admin được xóa lớp
+        Route::delete('/lop-hoc/{id}', [LopHocController::class, 'destroy'])->middleware('role:admin');
     });
 });

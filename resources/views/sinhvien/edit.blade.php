@@ -137,7 +137,11 @@
             <div class="form-group">
                 <label for="lop_hoc_id">Lớp học</label>
                 <select id="lop_hoc_id" name="lop_hoc_id">
-                    <option value="">— Chưa xếp lớp —</option>
+                    @if (auth()->user()->isAdmin())
+                        <option value="">— Chưa xếp lớp —</option>
+                    @else
+                        <option value="">— Chọn lớp bạn chủ nhiệm —</option>
+                    @endif
                     @foreach ($lophocs as $lop)
                         <option value="{{ $lop->id }}" {{ old('lop_hoc_id', $sinhvien->lop_hoc_id) == $lop->id ? 'selected' : '' }}>
                             {{ $lop->ma_lop }} — {{ $lop->ten_lop }}

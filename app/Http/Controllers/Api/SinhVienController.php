@@ -36,6 +36,7 @@ class SinhVienController extends Controller
 
         $sinhViens = SinhVien::query()
             ->with('lopHoc')
+            ->cuaNguoiDung($request->user())
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
                     $q->where('ma_sv', 'like', "%{$search}%")
@@ -68,9 +69,9 @@ class SinhVienController extends Controller
     /**
      * GET /api/sinh-vien/{id}
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $sinhVien = SinhVien::with('lopHoc')->findOrFail($id);
+        $sinhVien = SinhVien::with('lopHoc')->cuaNguoiDung($request->user())->findOrFail($id);
 
         return $this->success(new SinhVienResource($sinhVien));
     }
@@ -80,7 +81,7 @@ class SinhVienController extends Controller
      */
     public function update(UpdateSinhVienRequest $request, $id)
     {
-        $sinhVien = SinhVien::findOrFail($id);
+        $sinhVien = SinhVien::cuaNguoiDung($request->user())->findOrFail($id);
         $sinhVien->update($request->validated());
 
         return $this->success(new SinhVienResource($sinhVien->load('lopHoc')), 'Cập nhật sinh viên thành công');
@@ -89,9 +90,9 @@ class SinhVienController extends Controller
     /**
      * DELETE /api/sinh-vien/{id}
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        SinhVien::findOrFail($id)->delete();
+        SinhVien::cuaNguoiDung($request->user())->findOrFail($id)->delete();
 
         return $this->success(null, 'Đã xóa sinh viên');
     }

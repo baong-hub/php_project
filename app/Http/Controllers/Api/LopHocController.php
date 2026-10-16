@@ -34,6 +34,7 @@ class LopHocController extends Controller
 
         $lopHocs = LopHoc::query()
             ->withCount('sinhViens')
+            ->cuaNguoiDung($request->user())
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($q) use ($search) {
                     $q->where('ma_lop', 'like', "%{$search}%")
@@ -63,9 +64,9 @@ class LopHocController extends Controller
     /**
      * GET /api/lop-hoc/{id}
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $lopHoc = LopHoc::withCount('sinhViens')->findOrFail($id);
+        $lopHoc = LopHoc::withCount('sinhViens')->cuaNguoiDung($request->user())->findOrFail($id);
 
         return $this->success(new LopHocResource($lopHoc));
     }
@@ -75,7 +76,7 @@ class LopHocController extends Controller
      */
     public function update(UpdateLopHocRequest $request, $id)
     {
-        $lopHoc = LopHoc::findOrFail($id);
+        $lopHoc = LopHoc::cuaNguoiDung($request->user())->findOrFail($id);
         $lopHoc->update($request->validated());
 
         return $this->success(new LopHocResource($lopHoc), 'Cập nhật lớp học thành công');
@@ -84,9 +85,9 @@ class LopHocController extends Controller
     /**
      * DELETE /api/lop-hoc/{id}
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        LopHoc::findOrFail($id)->delete();
+        LopHoc::cuaNguoiDung($request->user())->findOrFail($id)->delete();
 
         return $this->success(null, 'Đã xóa lớp học');
     }

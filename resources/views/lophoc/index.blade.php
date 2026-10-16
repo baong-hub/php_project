@@ -78,7 +78,13 @@
     <div class="list-header">
         <div class="list-heading">
             <h1 class="list-title">Danh sách lớp học</h1>
-            <p class="list-subtitle">Tìm kiếm, lọc sĩ số và quản lý các lớp học.</p>
+            <p class="list-subtitle">
+                @if (auth()->user()->isAdmin())
+                    Tìm kiếm, lọc sĩ số và quản lý các lớp học.
+                @else
+                    Các lớp bạn đang chủ nhiệm.
+                @endif
+            </p>
         </div>
         <a href="{{ route('lophoc.create') }}" class="primary-link">+ Thêm lớp học</a>
     </div>
@@ -166,11 +172,14 @@
                             <td>
                                 <div class="row-actions">
                                     <a href="{{ route('lophoc.edit', $lop->id) }}" class="action-link">Sửa</a>
-                                    <form action="{{ route('lophoc.destroy', $lop->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa lớp {{ $lop->ten_lop }} không?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="delete-button">Xóa</button>
-                                    </form>
+                                    {{-- Chỉ admin được xóa lớp --}}
+                                    @if (auth()->user()->isAdmin())
+                                        <form action="{{ route('lophoc.destroy', $lop->id) }}" method="POST" onsubmit="return confirm('Bạn có chắc muốn xóa lớp {{ $lop->ten_lop }} không?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="delete-button">Xóa</button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

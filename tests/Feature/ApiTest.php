@@ -85,9 +85,11 @@ class ApiTest extends TestCase
 
     public function test_lop_hoc_index_loc_sap_xep_phan_trang(): void
     {
-        $this->dangNhapApi();
-        LopHoc::factory()->create(['ma_lop' => 'TIM01', 'ten_lop' => 'Lớp Cần Tìm', 'trang_thai' => true]);
-        LopHoc::factory()->count(14)->create(['trang_thai' => false]);
+        $gv = $this->dangNhapApi();
+        LopHoc::factory()->cuaGiangVien($gv)->create(['ma_lop' => 'TIM01', 'ten_lop' => 'Lớp Cần Tìm', 'trang_thai' => true]);
+        LopHoc::factory()->cuaGiangVien($gv)->count(14)->create(['trang_thai' => false]);
+        // Lớp của giảng viên khác: không được xuất hiện
+        LopHoc::factory()->count(3)->create(['trang_thai' => true]);
 
         $this->getJson('/api/lop-hoc?search=TIM01')
             ->assertOk()
@@ -129,18 +131,26 @@ class ApiTest extends TestCase
             'trang_thai' => true,
         ])->assertOk()->assertJsonPath('data.ten_lop', 'Lớp API Đã Sửa');
 
+        // Giảng viên không được xóa lớp, admin thì được
+        $this->deleteJson("/api/lop-hoc/{$id}")->assertForbidden();
+
+        $this->dangNhapApi(User::factory()->admin()->create());
         $this->deleteJson("/api/lop-hoc/{$id}")->assertOk();
         $this->getJson("/api/lop-hoc/{$id}")->assertNotFound();
     }
 
     public function test_lop_hoc_validate(): void
     {
-        $this->dangNhapApi();
+        $this->dangNhapApi(User::factory()->admin()->create());
         LopHoc::factory()->create(['ma_lop' => 'TRUNG']);
 
         $this->postJson('/api/lop-hoc', ['ma_lop' => 'TRUNG', 'si_so' => 0])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['ma_lop', 'ten_lop', 'giao_vien', 'si_so', 'trang_thai']);
+            ->assertJsonValidationErrors(['ma_lop', 'ten_lop', 'giang_vien_id', 'si_so', 'trang_thai']);
+
+        // Admin không được gán lớp cho tài khoản admin
+        $this->postJson('/api/lop-hoc', ['giang_vien_id' => User::factory()->admin()->create()->id])
+            ->assertJsonValidationErrors('giang_vien_id');
     }
 
     public function test_api_cap_nhat_thieu_trang_thai_khong_ngam_tat(): void
@@ -162,10 +172,13 @@ class ApiTest extends TestCase
 
     public function test_sinh_vien_index_loc_theo_lop(): void
     {
-        $this->dangNhapApi();
-        $lop = LopHoc::factory()->create();
+        $gv = $this->dangNhapApi();
+        $lop = LopHoc::factory()->cuaGiangVien($gv)->create();
+        $lopKhac = LopHoc::factory()->cuaGiangVien($gv)->create();
         SinhVien::factory()->count(3)->create(['lop_hoc_id' => $lop->id]);
-        SinhVien::factory()->count(2)->create();
+        SinhVien::factory()->count(2)->create(['lop_hoc_id' => $lopKhac->id]);
+        // Sinh viên lớp của giảng viên khác: không được xuất hiện
+        SinhVien::factory()->count(4)->create();
 
         $this->getJson("/api/sinh-vien?lop_hoc_id={$lop->id}")
             ->assertOk()

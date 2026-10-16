@@ -13,6 +13,7 @@ class LopHocResource extends JsonResource
             'id' => $this->id,
             'ma_lop' => $this->ma_lop,
             'ten_lop' => $this->ten_lop,
+            'giang_vien_id' => $this->giang_vien_id,
             'giao_vien' => $this->giao_vien,
             'so_dien_thoai_gvcn' => $this->so_dien_thoai_gvcn,
             'si_so' => $this->si_so,

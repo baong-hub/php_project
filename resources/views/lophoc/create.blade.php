@@ -105,8 +105,21 @@
             </div>
 
             <div class="form-group">
-                <label for="giao_vien">Giáo viên</label>
-                <input type="text" id="giao_vien" name="giao_vien" value="{{ old('giao_vien') }}" placeholder="Nguyễn Văn A">
+                <label for="giang_vien_id">Giảng viên chủ nhiệm</label>
+                @if (auth()->user()->isAdmin())
+                    <select id="giang_vien_id" name="giang_vien_id">
+                        <option value="">— Chọn giảng viên —</option>
+                        @foreach ($giangViens as $gv)
+                            <option value="{{ $gv->id }}" {{ (string) old('giang_vien_id', '') === (string) $gv->id ? 'selected' : '' }}>
+                                {{ $gv->name }} ({{ $gv->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('giang_vien_id') <small class="form-hint" style="color:#a32626;">{{ $message }}</small> @enderror
+                @else
+                    {{-- Giảng viên tạo/sửa lớp thì lớp luôn thuộc về chính mình --}}
+                    <input type="text" value="{{ auth()->user()->name }}" readonly>
+                @endif
             </div>
 
             <div class="form-group">

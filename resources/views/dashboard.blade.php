@@ -37,7 +37,13 @@
 
 @section('content')
     <div class="page-title">Dashboard</div>
-    <div class="page-sub">Tổng quan hệ thống quản lý sinh viên.</div>
+    <div class="page-sub">
+        @if (auth()->user()->isAdmin())
+            Tổng quan hệ thống quản lý sinh viên.
+        @else
+            Tổng quan các lớp bạn chủ nhiệm.
+        @endif
+    </div>
 
     <div class="stat-grid">
         <a href="{{ route('sinhvien.index') }}" class="stat-card">
